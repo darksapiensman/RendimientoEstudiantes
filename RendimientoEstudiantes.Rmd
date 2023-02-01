@@ -1,0 +1,225 @@
+---
+---
+---
+
+### Maestría en sistemas de información gerencial con mención en Data Science
+
+### Módulo 11: Estadística para científicos de datos
+
+### Docente: Juan Pablo Zaldumbide Proaño
+
+### Alumnos: Lucas Andrés Carranza Moreno, Hermes Gregorio León
+
+### Análisis de la relación entre género, curso de preparación para el examen y rendimiento académico en estudiantes
+
+### (Enero 2023)
+
+### **Resumen**
+
+En este informe se analizó la relación entre el género de los estudiantes y si tomaron un curso de prepa-ración para el examen y su rendimiento académico en las áreas de matemáticas, lectura y escritura.
+
+Los resultados indican que, en general, los estudiantes que tomaron un curso de preparación obtuvieron mejores calificaciones que aquellos que no lo hicieron. Además, se encontró que no hubo diferencias sig-nificativas en el rendimiento académico entre los estudiantes masculinos y femeninos.
+
+```{r}
+# 1. Carga de  Librerias -------
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(rlist)
+
+#Usamos un tema para mejorar la apariencia de los gráficos
+theme_set(theme_minimal())
+options( repr.plot.height=4)
+```
+
+```{r}
+# 2. Limpieza de Entorno -------
+rm(list = ls())
+
+# 3. Logica del Script   -------
+
+# Importar los datos
+dataset <- read_csv("data/RendimientoEstudiantes.csv")
+View(dataset)
+
+# Calcular el total y el promedio de la calificación
+dataset$total.score = dataset$math.score +dataset$reading.score +dataset$writing.score
+dataset$avg.score = round((dataset$total.score)/3,0)
+
+# Vemos el resumen del dataset
+summary(dataset)
+```
+
+### **Dataset**
+
+Se utilizó una muestra de estudiantes de una escuela secundaria y se analizaron los resultados de los exámenes estandarizados de matemáticas, lectura y escritura. Se recolectó información sobre el género de los estudiantes y si tomaron o no un curso de preparación para el examen. Los datos se analizaron utilizando esta-dísticas descriptivas y se realizaron pruebas estadísticas para determinar si existía una relación significativa entre el género de los estudiantes y su rendimiento académico en las áreas de matemáticas, lectura y escritura.
+
+### **Significado de las variables.**
+
+-   gender: esta variable indica el género del estudiante, puede ser "male" o "female"
+
+```{=html}
+<!-- -->
+```
+-   race/ethnicity: esta variable indica la raza o etnia del estudiante, puede ser "group A", "group B", "group C", "group D" o "group E"
+
+-   parental level of education: esta variable indica el nivel de educación de los padres del estudiante, puede ser: bachelor's degree, some college, master's degree, associate's degree, high school, some high school
+
+-   lunch: esta variable indica el tipo de comida que el estudiante recibe en el almuerzo, puede ser "standar" o "free/reduced"
+
+-   test preparation course: esta variable indica si el estudiante tomó o no un curso de preparación para el examen, puede ser "completed" o "none"
+
+-   math score: esta variable indica la calificación obtenida por el estudiante en matemáticas en una escala de 0 a 100
+
+-   reading score: esta variable indica la calificación obtenida por el estudiante en lectura en una escala de 0 a 100
+
+-   writing score: esta variable indica la calificación obtenida por el estudiante en escritura en una escala de 0 a 100
+
+Estas variables son categóricas y numéricas respectivamente (math score, reading score, writing score). Cada una de estas variables proporciona información valiosa para analizar y entender mejor los resultados de los estudiantes en los exámenes.
+
+### **Algunas Visualizaciones de Datos para entender el contexto del dataset**
+
+Comparamos las calificaciones promedio entre estudiantes masculinos y femeninos. A partir del gráfico de densidad, vemos las calificaciones de los estudiantes por género, se puede observar que el género femenino tiene una media mayor que los estudiantes masculinos.
+
+```{r}
+
+#comparación de las puntuaciones promedio - hombres vs mujeres
+ggplot(dataset, aes( x= avg.score, color = gender))+
+geom_density() +
+geom_vline( color = "red",linetype = "dashed", lwd =0.5 ,xintercept = mean(dataset[dataset$gender == "female",]$avg.score))+
+geom_vline( color = "cyan",linetype = "dashed", lwd=0.5 , xintercept = mean(dataset[dataset$gender == "male",]$avg.score)) +
+labs(title ="Distribución de las puntuaciones por género", x ="Puntuación", y = "Densidad")
+
+```
+
+Anteriormente observamos que los estudiantes femeninos en general obtuvieron calificaciones más altas. Cuando trazamos las calificaciones para cada materia, vemos que los estudiantes masculinos obtuvieron calificaciones más altas en matemáticas y las mujeres se destacan en las materias de lectura y escritura.
+
+Este es un gráfico compuesto que permite comparar la distribución de calificaciones para cada materia entre los estudiantes masculinos y femeninos.
+
+```{r}
+
+#función para trazar la densidad de las calificaciones
+
+scoreplot<- function(data,xcol,ycol){
+myplot <- data%>%
+ggplot(aes_string ( x = xcol, fill = ycol)) +
+geom_density(alpha = 0.3)
+return(myplot)
+}
+
+subject <- c("math.score", "reading.score", "writing.score")
+mylist<- list() #creando una lista vacía para almacenar trazados
+
+#Crear un bucle para llamar a la función scoreplot() para cada materia y almacenar cada trazado en una lista
+
+for (sub in subject){
+myplot<-scoreplot(data = dataset, sub, "gender")
+mylist = rlist::list.append(mylist, myplot)
+}
+#utilizando la función ggarrange() del paquete ggbubr para trazar todos los 3 trazados juntos
+ggpubr::ggarrange(plotlist = mylist, ncol = 3, nrow = 1, common.legend = TRUE)
+```
+
+Se puede comparar la proporción de estudiantes de cada género que tomaron un curso de preparación para el examen y aquellos que no lo hicieron. El gráfico también muestra el número total de estudiantes por categoría en cada barra, lo que permite una comparación más precisa de la relación entre género y curso de preparación para el examen. A partir de este gráfico, se puede obtener una comprensión más profunda de cómo el género afecta la decisión de tomar un curso de preparación para el examen y cómo esto a su vez puede afectar las calificaciones finales de los estudiantes.
+
+```{r}
+dataset %>%
+ggplot( aes( x= gender, fill = test.preparation.course)) + 
+  geom_bar(position = "fill") +
+  geom_text(stat="count",aes(label=..count..), position = position_fill(vjust = 0.5))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(title ="Curso de Preparación por Género", x= "Género", y = "% de estudiantes")
+```
+
+### **Preconclusiones**
+
+Algunas preconclusiones que se podrían obtener de este conjunto de variables son las siguientes:
+
+1.  Existe una relación entre el género del estudiante y su rendimiento académico.
+
+2.  Hay un impacto en las calificaciones finales al tomar un curso de preparación.
+
+3.  El impacto del nivel de educación de los padres en el rendimiento académico de los estudiantes.
+
+4.  La relación entre el tipo de comida en el almuerzo y el rendimiento académico de los estudiantes.
+
+### **Evaluación de las hipótesis**
+
+La primera hipótesis es que *los estudiantes de género femenino obtienen mejores calificaciones en los exámenes que los estudiantes de género masculino*.
+
+Para probar esta hipótesis usaremos la función "t.test" para calcular intervalos de confianza para la media y la diferencia de medias, con muestras independientes y dependientes (o pareadas).
+
+Definimos: - x: vector numérico o variable con los datos de interés. - "conf.level": nivel de confianza a usar. Por defecto es 0,95.
+
+Nuestra hipótesis nula es que no hay diferencia en la media de las dos muestras, es decir, hombres y mujeres y nuestra hipótesis alternativa es que la muestra femenina tiene una media mayor que la muestra masculina.
+
+Realizamos una prueba (t-test) a dos muestras, de un solo lado, en la puntuación total para estudiantes masculinos y femeninos:
+
+```{r}
+#1. Probar si los estudiantes de género femenino obtienen mejores calificaciones en los exámenes que los estudiantes de género masculino
+
+#Filtramos los datos de los estudiantes masculinos y femeninos para una comparación adicional
+df_female <- dataset %>% filter(gender =="female")
+df_male <- dataset %>% filter(gender =="male")
+
+#Obtenemos la media y la desviación estándar de cada muestra
+female_mean <- df_female$total.score %>% mean() %>% round(1)
+female_sd <- df_female$total.score %>% sd() %>% round(1)
+
+male_mean <- df_male$total.score %>% mean() %>% round(1)
+male_sd <- df_male$total.score %>% sd() %>% round(1)
+
+#vemos los resultados
+cat(str_c("Puntuación total de las mujeres: media = ", female_mean, " y desviación estándar = ", female_sd, "\n"))
+cat(str_c("Puntuación total de los hombres: media = ", male_mean, " y desviación estándar = ", male_sd))
+
+#Nuestra hipótesis nula es que no hay diferencia en la media de las dos muestras, es decir, hombres y mujeres.
+#Nuestra hipótesis alternativa es que la muestra femenina tiene una media mayor que la muestra masculina.
+
+#Realizando una prueba  a dos muestras, de un solo lado, en la puntuación total para estudiantes masculinos y femeninos
+t.test(df_female$total.score, df_male$total.score, conf.level = 0.95, alternative = "greater")
+
+```
+
+A partir de los resultados vemos que p-value \< 0.05 y el intervalo de confianza no contiene 0. **Por lo tanto, rechazamos la hipótesis nula de que no hay diferencia entre las medias y concluimos que si existe una diferencia significativa**
+
+Nuestra segunda hipótesis es que *los estudiantes que no están tomando un curso de preparación para rendir los exámenes obtienen calificaciones más bajas que los que sí lo hacen*, probaremos la hipótesis usando una vez más t-test, previamente filtramos los datos de los estudiantes con y sin curso de preparación para exámenes para una comparación adicional y posteriormente obtenemos la media y desviación estándar de cada muestra los resultados nos indican que la puntuación total media de los alumnos que se prepararon es de 218 y la desviación estándar es de 39.1, mientras que la puntuación total media de los alumnos sin preparación es de 195.1 y la desviación estándar es 42.6.
+
+Nuestra hipótesis nula es que no hay diferencia en la media de las dos muestras, es decir, estudiantes sin preparación y estudiantes con preparación. Nuestra hipótesis alternativa es que los estudiantes que no toman un curso de preparación tienen una media menor que los que toman un curso de preparación. Usando R realizamos una prueba (t-test) a dos muestras, de un solo lado, en la puntuación total para estudiantes masculinos y femeninos:
+
+```{r}
+#2. Los estudiantes que no toman un curso de preparación para exámenes obtienen calificaciones más bajas que los que toman un curso de preparación para exámenes
+
+#Filtramos los datos de los estudiantes con y sin curso de preparación para exámenes para una comparación adicional
+df_test <- dataset %>% filter(test.preparation.course =="completed")
+df_notest <- dataset %>% filter(test.preparation.course =="none")
+
+#Obtenemos la media y desviación estándar de cada muestra
+test_mean <- df_test$total.score %>% mean() %>% round(1)
+test_sd <- df_test$total.score %>% sd() %>% round(1)
+
+notest_mean <- df_notest$total.score %>% mean() %>% round(1)
+notest_sd <- df_notest$total.score %>% sd() %>% round(1)
+
+#vemos los resultados
+cat(str_c("Puntuación total con preparación: media = ", test_mean, " y desviación estándar = ", test_sd, "\n"))
+cat(str_c("Puntuación total sin preparación: media = ", notest_mean, " y desviación estándar = ", notest_sd))
+
+#Nuestra hipótesis nula es que no hay diferencia en la media de las dos muestras, es decir, estudiantes sin preparación y estudiantes con preparación.
+#Nuestra hipótesis alternativa es que los estudiantes que no toman un curso de preparación tienen una media menor que los que toman un curso de preparación.
+
+#Realizando una prueba t de dos muestras, de un solo lado, en la puntuación total para estudiantes con y sin preparación.
+t.test(df_notest$total.score, df_test$total.score, conf.level = 0.95, alternative = "less")
+```
+
+A partir de estos resultados vemos que p-value es \<0.05 y el intervalo de confianza no contiene 0. **Por lo tanto, rechazamos la hipótesis nula de que no hay diferencia en las medias, es decir, estudiantes sin preparación y estudiantes con preparación y aceptamos que las muestras son estadísticamente significativas.**
+
+### **Conclusiones**
+
+En conclusión, el presente estudio ha demostrado que el curso de preparación para el examen tiene un impacto positivo en el rendimiento académico de los estudiantes. Además, se ha encontrado una relación significativa entre género y rendimiento académico, con los estudiantes femeninos obteniendo mejores resultados académicos en comparación con los estudiantes masculinos. Estos hallazgos son importantes ya que pueden ayudar a las instituciones educativas a tomar decisiones para mejorar el rendimiento académico de sus estudiantes.
+
+### **Recomendación**
+
+Considerando que el género masculino tiene buenas calificaciones en matemáticas, se tendría de explorar dichas capacidades y que sean aprovechadas en las otras materias. Evaluar qué factores afectan en las mujeres para que tengan menor promedio en matemáticas y tomar medidas para reducir esta brecha en comparación con los hombres.
+
+Buscar estrategias que promuevan a los estudiantes a tomar los cursos de preparación de examen.
