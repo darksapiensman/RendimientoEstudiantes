@@ -1,7 +1,3 @@
----
----
----
-
 ### Maestría en sistemas de información gerencial con mención en Data Science
 
 ### Módulo 11: Estadística para científicos de datos
@@ -57,22 +53,12 @@ Se utilizó una muestra de estudiantes de una escuela secundaria y se analizaron
 ### **Significado de las variables.**
 
 -   gender: esta variable indica el género del estudiante, puede ser "male" o "female"
-
-```{=html}
-<!-- -->
-```
 -   race/ethnicity: esta variable indica la raza o etnia del estudiante, puede ser "group A", "group B", "group C", "group D" o "group E"
-
 -   parental level of education: esta variable indica el nivel de educación de los padres del estudiante, puede ser: bachelor's degree, some college, master's degree, associate's degree, high school, some high school
-
 -   lunch: esta variable indica el tipo de comida que el estudiante recibe en el almuerzo, puede ser "standar" o "free/reduced"
-
 -   test preparation course: esta variable indica si el estudiante tomó o no un curso de preparación para el examen, puede ser "completed" o "none"
-
 -   math score: esta variable indica la calificación obtenida por el estudiante en matemáticas en una escala de 0 a 100
-
 -   reading score: esta variable indica la calificación obtenida por el estudiante en lectura en una escala de 0 a 100
-
 -   writing score: esta variable indica la calificación obtenida por el estudiante en escritura en una escala de 0 a 100
 
 Estas variables son categóricas y numéricas respectivamente (math score, reading score, writing score). Cada una de estas variables proporciona información valiosa para analizar y entender mejor los resultados de los estudiantes en los exámenes.
