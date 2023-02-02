@@ -4,7 +4,7 @@
 
 ### Docente: Juan Pablo Zaldumbide Proaño
 
-### Alumnos: Lucas Andrés Carranza Moreno, Hermes Gregorio León
+### Alumnos: Lucas Andrés Carranza Moreno, Hermes Gregorio León Jiménez
 
 ### Análisis de la relación entre género, curso de preparación para el examen y rendimiento académico en estudiantes
 
@@ -36,7 +36,7 @@ rm(list = ls())
 
 # Importar los datos
 dataset <- read_csv("data/RendimientoEstudiantes.csv")
-View(dataset)
+#View(dataset)
 
 # Calcular el total y el promedio de la calificación
 dataset$total.score = dataset$math.score +dataset$reading.score +dataset$writing.score
